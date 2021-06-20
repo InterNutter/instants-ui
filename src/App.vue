@@ -49,7 +49,47 @@
     <v-main>
       <v-container fluid>
         <!-- Settings nonsense: create account, login, aesthetics, faves, donations todo LATER -->
-        <div v-if="faq">
+        <div v-if='mode==="donate"'>
+          <h4 class="text-h4">Support the App, the Author, and the Team</h4>
+          <p>Even though this app is free and you can access any of my stories at any time, I am still a mortal being who needs frivolous things like... food.</p>
+          <p>As such, and without any obligation on your part, if you would like to support the author and the app team in having nice things, please consider donating.</p>
+          <v-row>
+            <v-col :md="6" :sm="12" class="d-flex flex-column">
+              <v-card class="flex d-flex flex-column">
+                <v-card-title>Ko-fi</v-card-title>
+                <v-card-subtitle>
+                  One-time donation, minimum $3
+                </v-card-subtitle>
+                <v-card-text>
+                  Ko-fi is a less evil, more cuddly donations platform that allows all users to use any name they like, without being linked to the name on your credit card. It allows for single, non-recurring donations.
+                </v-card-text>
+                <v-card-actions>
+                  <v-btn class="primary" @click.stop="gotoURL('https://ko-fi.com/cmweller')">
+                    <v-icon left>mdi-cup</v-icon> Donate
+                  </v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-col>
+            <v-col :md="6" :sm="12" class="d-flex flex-column">
+              <v-card class="flex d-flex flex-column">
+                <v-card-title>Patreon</v-card-title>
+                <v-card-subtitle>
+                  Regular monthly donation, minimum $1
+                </v-card-subtitle>
+                <v-card-text>
+                  Patreon is the defacto donation platform for creative peoples world-wide. Depending on how much you are willing to donate per month, you have access to all kinds of exclusive donor-only perks, and previews of some of my more exciting content before the rest of the universe.
+                </v-card-text>
+                <v-card-actions>
+                  <v-btn class="primary" @click.stop="gotoURL('https://www.patreon.com/cmweller')">
+                    <v-icon left>mdi-patreon</v-icon> Donate
+                  </v-btn>
+                </v-card-actions>
+
+              </v-card>
+            </v-col>
+          </v-row>
+        </div>
+        <div v-else-if="mode==='faq'">
           <!-- I have been adding these as they occurred to me. Reorder so they make sense? -->
           <h2>Most of your questions... answered.</h2>
           <p><b>What is this, anyway?</b><br />
@@ -117,6 +157,14 @@
             There will also be an option to collect your favourites.<br />
             We want as many people as possible reading these things, so accessibility is a priority. But since there's only two of us, it might take a bit of a while.
           </p>
+          <p><b>Are there donation rewards?</b><br />
+            In brief: sort of.<br />
+            The donations page is more or less a link to two fundraisers I already have going: Ko-fi and Patreon.<br />
+            Donors on Ko-fi will have a variant of their name or internet handle used as a character in a fresh Instant, as well as thanks for their kind donation as a postscript.<br />
+            Sponsors on Patreon will gain access to Patreon content according to their tier.<br />
+            For those worried about the "variant" part - C. M. Weller will take a part of or a variation of the name given in Ko-fi to use as a character in an Instant. There is no guarantee that that variant name will not turn up as a villain in fiction.<br />
+            Rest assured, all the same, that you are a hero to us.
+          </p>
           <p><b>I didn't like a story!</b><br />
             Well, they can't all be winners.<br />
             Some of them were written before C. M. learned about certain things. Some are indeed products of their time. Some are... very angry indeed about certain things. Some are truly gross. Some will confront you with new concepts. That's okay.<br />
@@ -160,7 +208,7 @@
             Currently [2021] there is only <a href="https://www.smashwords.com/profile/view/CMWeller">Smashwords</a> and <a href="https://www.lulu.com/spotlight/KFZ">Lulu</a> where you can own a thing and also give us money.
           </p>
         </div>
-        <div v-else-if="searchResults">
+        <div v-else-if="mode==='search'">
           <v-list-item
               v-for="(title, number) in searchResults"
               :key="number" @click.stop="gotoNumber(number)"
@@ -174,16 +222,20 @@
             </v-list-item-content>
           </v-list-item>
         </div>
-        <div v-else-if="story">
-          <div class="text-h4">{{story.title}}</div>
+        <div v-else-if="mode==='story'">
+          <div class="text-h4">
+            {{story.title}}
 
-          <subtitle-1>
-            <VueDocPreview
-                :value="story.prompt"
-                class="text-h6"
-                type="markdown"
-            />
-          </subtitle-1>
+            <v-btn icon class="mr-sm-1" @click.stop="favStory(number)">
+              <v-icon :color="favColour(number)">{{ favIcon(number) }}</v-icon>
+            </v-btn>
+          </div>
+
+          <VueDocPreview
+              :value="story.prompt"
+              class="text-h6"
+              type="markdown"
+          />
 
           <v-chip
               class="mr-1 pa-1"
@@ -195,15 +247,33 @@
             {{ tag }}
           </v-chip>
 
-          <body-1>
-            <VueDocPreview
-                :value="story.content"
-                class="body-1"
-                type="markdown"
-            />
-          </body-1>
+          <VueDocPreview
+              :value="story.content"
+              class="body-1"
+              type="markdown"
+          />
 
 
+        </div>
+        <div v-else-if="mode==='thanks'">
+          <!-- This is the bit where I thank all the patrons in descending order of donation value -->
+          <h2>Many Gracious thanks to...</h2>
+          <p><b>Primary Codination:</b> norganna<br />
+             <b>Miminal Codination:</b> InterNutter<br />
+             <b>Flights of Fantasy:</b> C. M. Weller
+          </p>
+          <h3>Lovely Patrons:</h3>
+          <ul>
+            <li><v-icon left>mdi-star</v-icon><i>Reckless Prudence</i>,</li>
+            <li>Richard Morse,</li>
+            <li>Kelda Choc,</li>
+            <li>Wayne Roy,</li>
+            <li>Emily Scribe Protra,</li>
+            <li>Scott Haubert,</li>
+            <li>Megan McCauley,</li>
+            <li>Ran Akki,</li>
+          </ul>
+          <h3>...And You</h3>
         </div>
         <div v-else>
           <div class="text-h4">Welcome to Mobile Instants!</div>
@@ -257,7 +327,11 @@
           <span v-if="$vuetify.breakpoint.mdAndUp"> Prev</span>
         </v-btn>
 
-        <div class="story-number">
+        <v-btn icon class="mr-sm-1" @click.stop="favStory(number)">
+          <v-icon :color="favColour(number)">{{ favIcon(number) }}</v-icon>
+        </v-btn>
+
+        <div class="story-number" @click="perform('show-num-window')">
           {{number}}
         </div>
 
@@ -348,6 +422,8 @@
                   :counter="4"
                   label="Story Number"
                   @keydown.enter="gotoNum(storyNum)"
+                  @focus="$event.target.select()"
+                  autofocus
                   required
               ></v-text-field>
             </v-list-item>
@@ -416,6 +492,7 @@ export default {
   },
 
   data: () => ({
+    mode: 'home',
     drawer: null,
     items: [
       // Nav by calendar
@@ -444,8 +521,14 @@ export default {
         action: 'show-faq'
       },
       {
+        title: 'Thanks',
+        icon: 'mdi-emoticon-kiss',
+        action: 'show-thanks'
+      },
+      {
         title: 'Donate Options',
-        icon: 'mdi-cash-multiple'
+        icon: 'mdi-cash-multiple',
+        action: 'show-donates'
       },
       {
         title: 'Settings',
@@ -453,10 +536,23 @@ export default {
         signedIn: true
       },
       {
-        title: 'Sign In/Register',
-        icon: 'mdi-account'
+        title: 'Sign In',
+        icon: 'mdi-account',
+        action: 'sign-in',
+        signedIn: false
+      },
+      {
+        title: 'Register',
+        icon: 'mdi-account-plus',
+        action: 'show-register',
+        signedIn: false
+      },
+      {
+        title: 'Sign Out',
+        icon: 'mdi-logout',
+        action: 'sign-out',
+        signedIn: true
       }
-
     ],
     account: null,
     number: 0,
@@ -480,18 +576,41 @@ export default {
         v => v.length > 1 || 'Tag too short',
     ],
     searchResults: null,
-    faq: false,
+    favourites: {},
   }),
+  mounted() {
+    const that = this;
+    fetch(`${apiURL}/account`, {
+      credentials: "include"
+    }).then(async(res) => {
+      try {
+        const account = await res.json();
+        if (account && account.signedIn) {
+          that.account = account;
+          that.loadFavourites();
+        }
+      } catch (e) {
+        that.snacktext='Failed to decode account response.';
+        that.snackbar=true;
+      }
+    }).catch(() => {
+      that.snacktext='Error trying to fetch account.';
+      that.snackbar=true;
+    });
+  },
   computed: {
     getItems() {
       const items=[];
       for (const item of this.items) {
-        if (!item.signedIn || this.account) {
+        if (item.signedIn === true && this.account
+            || item.signedIn === false && !this.account
+            || item.signedIn === undefined) {
           items.push(item);
         }
       }
       return items;
-    }
+    },
+
   },
   methods: {
     hamburger() {
@@ -542,9 +661,10 @@ export default {
 
       fetch(`${apiURL}/story/${number}`).then(async (res)=> {
         try {
+          that.reset();
           that.story = await res.json();
           that.number = that.story.number;
-          that.reset();
+          that.mode='story';
         } catch (e) {
           that.snacktext='Whoops! No story to be had.';
           that.snackbar=true;
@@ -557,6 +677,38 @@ export default {
         that.tags = await res.json();
       });
 
+    },
+    loadFavourites() {
+      const that = this;
+      fetch(`${apiURL}/favourites`, {
+        credentials: "include"
+      }).then(async(res) => {
+        try {
+          const faves = await res.json();
+          if (faves) {
+            const favourites = {};
+            for (const fave of faves) {
+              favourites[fave] = true;
+            }
+            that.favourites = favourites;
+          }
+        } catch (e) {
+          that.snacktext='Failed to decode favourites response.';
+          that.snackbar=true;
+        }
+      }).catch(() => {
+        that.snacktext='Error trying to fetch favourites.';
+        that.snackbar=true;
+      });
+
+    },
+    signOut() {
+      const that = this;
+      fetch(`${apiURL}/sign-out`, {
+        credentials: "include"
+      }).then(() => {
+        that.account = null;
+      });
     },
     gotoDate() {
       this.calendar=false;
@@ -572,20 +724,27 @@ export default {
       this.searchResults = null;
       this.load(number);
     },
+    gotoURL(href) {
+      window.open(href, '_blank');
+    },
+    gotoSignIn() {
+      document.location = `${apiURL}/sign-in`;
+    },
     searchTag(tag) {
       this.tagselect = false;
       const that = this;
       fetch(`${apiURL}/tag/${tag.toLowerCase()}`).then(async (res)=> {
         try {
           that.reset();
-          that.searchResults=await res.json();
+          that.searchResults = await res.json();
+          that.mode = 'search';
         } catch (e) {
-          that.snacktext='Whoops! No stories to be found.';
-          that.snackbar=true;
+          that.snacktext = 'Whoops! No stories to be found.';
+          that.snackbar = true;
         }
       }).catch (() => {
-        that.snacktext='Whoops! Error fetching stories.';
-        that.snackbar=true;
+        that.snacktext = 'Whoops! Error fetching stories.';
+        that.snackbar = true;
       });
     },
     reset() {
@@ -593,7 +752,6 @@ export default {
       this.calendar = false;
       this.numselect = false;
       this.tagselect = false;
-      this.faq = false;
     },
     perform(action) {
       this.reset();
@@ -608,9 +766,69 @@ export default {
           this.tagselect = true;
           break;
         case 'show-faq':
-          this.faq = true;
+          this.mode = 'faq';
+          break;
+        case 'show-donates':
+          this.mode = 'donate';
+          break;
+        case 'sign-in':
+          this.gotoSignIn();
+          break;
+        case 'sign-out':
+          this.signOut();
+          break;
+        case 'show-thanks' :
+          this.mode = 'thanks';
           break;
       }
+    },
+    favStory(number) {
+      if (!this.account) {
+        this.snacktext = 'Sorry, this app will not remember your favourites if you are not logged in. Please log in or create an account.'
+        this.snackbar = true;
+        return;
+      }
+      const set = !this.favourites[number];
+      this.$set(this.favourites, number, set);
+      fetch(`${apiURL}/favourite`, {
+        method: 'POST',
+        headers:  new Headers({
+          'Content-Type': 'application/json; charset=utf-8'
+        }),
+        body: JSON.stringify({
+          number,
+          set,
+        }),
+        credentials: "include",
+      });
+      /*
+
+      POST /favourite
+      {
+        "number": 1234,
+        "set": true
+      }
+
+      + How do we tell it what story number we're adding / clearing this favourite from?
+      + How do we tell it that we're ADDING or CLEARING?
+      + Are we just sending an ADD / CLEARING one at a time?
+
+       */
+
+
+      // take number and add it to the database table of user favourites
+    },
+    favIcon(number) {
+      if (this.favourites[number]) {
+        return 'mdi-heart';
+      }
+      return 'mdi-heart-outline';
+    },
+    favColour(number) {
+      if (this.favourites[number]) {
+        return 'red';
+      }
+      return 'primary';
     },
   }
 }

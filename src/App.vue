@@ -472,9 +472,12 @@
 </style>
 
 <script>
-import VueDocPreview from 'vue-doc-preview'
+import VueDocPreview from 'vue-doc-preview';
 
-const apiURL = 'http://192.168.5.127:3000';
+let config = {
+  apiURL: `${document.location.protocol}//${document.location.hostname}:3000`,
+};
+
 const startDate = new Date(2013,0,1, 0, 0, 0, 0);
 
 function numberForDate(date) {
@@ -578,9 +581,17 @@ export default {
     searchResults: null,
     favourites: {},
   }),
+  created() {
+    fetch('config.json').then(async(res) => {
+      try {
+        config = await res.json();
+      } catch (e) {
+      }
+    });
+  },
   mounted() {
     const that = this;
-    fetch(`${apiURL}/account`, {
+    fetch(`${config.apiURL}/account`, {
       credentials: "include"
     }).then(async(res) => {
       try {
@@ -659,7 +670,7 @@ export default {
       }
       const that = this;
 
-      fetch(`${apiURL}/story/${number}`).then(async (res)=> {
+      fetch(`${config.apiURL}/story/${number}`).then(async (res)=> {
         try {
           that.reset();
           that.story = await res.json();
@@ -673,14 +684,14 @@ export default {
         that.snacktext='Whoops! Error fetching story.';
         that.snackbar=true;
       });
-      fetch(`${apiURL}/tags/${number}`).then(async (res)=> {
+      fetch(`${config.apiURL}/tags/${number}`).then(async (res)=> {
         that.tags = await res.json();
       });
 
     },
     loadFavourites() {
       const that = this;
-      fetch(`${apiURL}/favourites`, {
+      fetch(`${config.apiURL}/favourites`, {
         credentials: "include"
       }).then(async(res) => {
         try {
@@ -704,7 +715,7 @@ export default {
     },
     signOut() {
       const that = this;
-      fetch(`${apiURL}/sign-out`, {
+      fetch(`${config.apiURL}/sign-out`, {
         credentials: "include"
       }).then(() => {
         that.account = null;
@@ -728,12 +739,12 @@ export default {
       window.open(href, '_blank');
     },
     gotoSignIn() {
-      document.location = `${apiURL}/sign-in`;
+      document.location = `${config.apiURL}/sign-in`;
     },
     searchTag(tag) {
       this.tagselect = false;
       const that = this;
-      fetch(`${apiURL}/tag/${tag.toLowerCase()}`).then(async (res)=> {
+      fetch(`${config.apiURL}/tag/${tag.toLowerCase()}`).then(async (res)=> {
         try {
           that.reset();
           that.searchResults = await res.json();
@@ -790,7 +801,7 @@ export default {
       }
       const set = !this.favourites[number];
       this.$set(this.favourites, number, set);
-      fetch(`${apiURL}/favourite`, {
+      fetch(`${config.apiURL}/favourite`, {
         method: 'POST',
         headers:  new Headers({
           'Content-Type': 'application/json; charset=utf-8'

@@ -586,6 +586,7 @@ export default {
       try {
         config = await res.json();
       } catch (e) {
+        return;
       }
     });
   },

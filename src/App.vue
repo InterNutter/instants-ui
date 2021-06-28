@@ -3,8 +3,10 @@
   <v-app>
     <v-app-bar app>
       <v-app-bar-nav-icon @click="hamburger"></v-app-bar-nav-icon>
-      <v-img src="nib.svg" height="48" contain></v-img>
-      <v-toolbar-title class="ml-5">Mobile Instants</v-toolbar-title>
+      <v-img src="nib.svg" max-height="48" max-width="48" contain></v-img>
+      <v-toolbar-title>
+        Mobile Instants
+      </v-toolbar-title>
       <!-- Options for Drawer: Nav by Calendar. Nav by Story Number. Nav by tag. FAQ. [Sign in. Sign up] -->
       <!-- Perma-visible are: First, Prev, Next, Last -->
     </v-app-bar>

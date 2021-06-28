@@ -1,6 +1,6 @@
 {
-    "name": "Mobile Instants",
-    "short_name": "Mobile Instants",
+    "name": "Instants",
+    "short_name": "Instants",
     "icons": [
         {
             "src": "/android-chrome-192x192.png",
@@ -13,7 +13,7 @@
             "type": "image/png"
         }
     ],
-    "theme_color": "#00aba9",
-    "background_color": "#00aba9",
+    "theme_color": "#4acf1f",
+    "background_color": "#4acf1f",
     "display": "standalone"
 }

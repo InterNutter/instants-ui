@@ -3,7 +3,10 @@
   <v-app>
     <v-app-bar app>
       <v-app-bar-nav-icon @click="hamburger"></v-app-bar-nav-icon>
-      <v-toolbar-title>Mobile Instants</v-toolbar-title>
+      <v-img src="nib.svg" max-height="48" max-width="48" contain></v-img>
+      <v-toolbar-title>
+        Mobile Instants
+      </v-toolbar-title>
       <!-- Options for Drawer: Nav by Calendar. Nav by Story Number. Nav by tag. FAQ. [Sign in. Sign up] -->
       <!-- Perma-visible are: First, Prev, Next, Last -->
     </v-app-bar>
@@ -472,9 +475,9 @@
 </style>
 
 <script>
-import VueDocPreview from 'vue-doc-preview'
+import VueDocPreview from 'vue-doc-preview';
 
-const apiURL = 'http://192.168.5.127:3000';
+
 const startDate = new Date(2013,0,1, 0, 0, 0, 0);
 
 function numberForDate(date) {
@@ -554,6 +557,9 @@ export default {
         signedIn: true
       }
     ],
+    config: {
+      apiURL: `${document.location.protocol}//${document.location.hostname}:3000`,
+    },
     account: null,
     number: 0,
     story: null,
@@ -578,25 +584,21 @@ export default {
     searchResults: null,
     favourites: {},
   }),
-  mounted() {
-    const that = this;
-    fetch(`${apiURL}/account`, {
-      credentials: "include"
-    }).then(async(res) => {
+  created() {
+    fetch('config.json').then(async(res) => {
       try {
-        const account = await res.json();
-        if (account && account.signedIn) {
-          that.account = account;
-          that.loadFavourites();
-        }
+        this.config = await res.json();
+        this.config.success = true;
       } catch (e) {
-        that.snacktext='Failed to decode account response.';
-        that.snackbar=true;
+        this.config.success = false;
+      } finally {
+        this.config.loaded = true;
       }
-    }).catch(() => {
-      that.snacktext='Error trying to fetch account.';
-      that.snackbar=true;
+      this.init();
     });
+  },
+  mounted() {
+    this.init();
   },
   computed: {
     getItems() {
@@ -613,6 +615,27 @@ export default {
 
   },
   methods: {
+    init() {
+      if (!this.config.loaded) return;
+      const that = this;
+      fetch(`${this.config.apiURL}/account`, {
+        credentials: "include"
+      }).then(async(res) => {
+        try {
+          const account = await res.json();
+          if (account && account.signedIn) {
+            that.account = account;
+            that.loadFavourites();
+          }
+        } catch (e) {
+          that.snacktext='Failed to decode account response.';
+          that.snackbar=true;
+        }
+      }).catch(() => {
+        that.snacktext='Error trying to fetch account.';
+        that.snackbar=true;
+      });
+    },
     hamburger() {
       console.log('hamburger clicked')
       // I do believe this is where all the nav buttons mentioned above go?
@@ -659,7 +682,7 @@ export default {
       }
       const that = this;
 
-      fetch(`${apiURL}/story/${number}`).then(async (res)=> {
+      fetch(`${this.config.apiURL}/story/${number}`).then(async (res)=> {
         try {
           that.reset();
           that.story = await res.json();
@@ -673,14 +696,14 @@ export default {
         that.snacktext='Whoops! Error fetching story.';
         that.snackbar=true;
       });
-      fetch(`${apiURL}/tags/${number}`).then(async (res)=> {
+      fetch(`${this.config.apiURL}/tags/${number}`).then(async (res)=> {
         that.tags = await res.json();
       });
 
     },
     loadFavourites() {
       const that = this;
-      fetch(`${apiURL}/favourites`, {
+      fetch(`${this.config.apiURL}/favourites`, {
         credentials: "include"
       }).then(async(res) => {
         try {
@@ -704,7 +727,7 @@ export default {
     },
     signOut() {
       const that = this;
-      fetch(`${apiURL}/sign-out`, {
+      fetch(`${this.config.apiURL}/sign-out`, {
         credentials: "include"
       }).then(() => {
         that.account = null;
@@ -728,12 +751,12 @@ export default {
       window.open(href, '_blank');
     },
     gotoSignIn() {
-      document.location = `${apiURL}/sign-in`;
+      document.location = `${this.config.apiURL}/sign-in`;
     },
     searchTag(tag) {
       this.tagselect = false;
       const that = this;
-      fetch(`${apiURL}/tag/${tag.toLowerCase()}`).then(async (res)=> {
+      fetch(`${this.config.apiURL}/tag/${tag.toLowerCase()}`).then(async (res)=> {
         try {
           that.reset();
           that.searchResults = await res.json();
@@ -790,7 +813,7 @@ export default {
       }
       const set = !this.favourites[number];
       this.$set(this.favourites, number, set);
-      fetch(`${apiURL}/favourite`, {
+      fetch(`${this.config.apiURL}/favourite`, {
         method: 'POST',
         headers:  new Headers({
           'Content-Type': 'application/json; charset=utf-8'
